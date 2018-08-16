@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="lance_weather"/>
+    <version value="1"/>
+    <list>
+        <mapping class="com.lanceweather.android.db.Province"/>
+        <mapping class="com.lanceweather.android.db.City"/>
+        <mapping class="com.lanceweather.android.db.County"/>
+    </list>
+</litepal>
