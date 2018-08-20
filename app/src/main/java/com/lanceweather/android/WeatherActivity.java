@@ -1,13 +1,19 @@
 package com.lanceweather.android;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -17,6 +23,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.lanceweather.android.gson.Forecast;
 import com.lanceweather.android.gson.Weather;
+import com.lanceweather.android.service.AutoUpdateService;
 import com.lanceweather.android.util.HttpUtil;
 import com.lanceweather.android.util.Utility;
 
@@ -39,9 +46,24 @@ public class WeatherActivity extends AppCompatActivity {
     private  TextView carWashText;
     private TextView sportText;
     private ImageView bingPicImg;
+    public SwipeRefreshLayout swipeRefreshLayout;
+    private String mWeatherId;
+    public DrawerLayout drawerLayout;
+    private Button navButton;
+    private  ImageView nowImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*//背景图层融入状态栏
+
+        if(Build.VERSION.SDK_INT>=21){
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }*/
+
         setContentView(R.layout.activity_weather);
 
         weatherLayout =(ScrollView) findViewById(R.id.weather_layout) ;
@@ -55,18 +77,30 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText=(TextView) findViewById(R.id.comfort_text);
         carWashText=(TextView) findViewById(R.id.car_wash_text);
         sportText=(TextView) findViewById(R.id.sport_text);
+        nowImage=(ImageView) findViewById(R.id.now_image_view);
+
+        //更新天气
+        swipeRefreshLayout=(SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = preferences.getString("weather",null);
         if(weatherString!=null)
         {
             Weather weather=Utility.handleWeatherResponse(weatherString);
+            mWeatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         }
         else {
-            String weatherId=getIntent().getStringExtra("weather_id");
+           mWeatherId=getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
-             requestWeather(weatherId);
+             requestWeather(mWeatherId);
        }
+       swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+           @Override
+           public void onRefresh() {
+               requestWeather(mWeatherId);
+           }
+       });
 
        //加载背景图片
        bingPicImg=(ImageView) findViewById(R.id.bing_pic_img);
@@ -78,19 +112,24 @@ public class WeatherActivity extends AppCompatActivity {
         else
             loadBingPic();
 
-        //背景图层融入状态栏
 
-        /*if(Build.VERSION.SDK_INT>=21){
-            View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            );
-        if(Build.VERSION.SDK_INT>=21)
-            getWindow().setStatusBarColor(Color.argb(00,00,00,00));
-        */
+
+
+
+        //切换城市
+        drawerLayout=(DrawerLayout) findViewById(R.id.drawer_layout);
+        navButton=(Button) findViewById(R.id.nav_button);
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+
 
     }
-    private void requestWeather(final String weatherId)
+    public void requestWeather(final String weatherId)
     {
         String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherId+
                 "&key=87ba45595c7b4ba78a14c61eeaae2316";
@@ -102,6 +141,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_LONG).show();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -118,10 +158,12 @@ public class WeatherActivity extends AppCompatActivity {
                                 getDefaultSharedPreferences(WeatherActivity.this).edit();
                         editor.putString("weather",responseText);
                         editor.apply();
+                        mWeatherId=weather.basic.weatherId;
                         showWeatherInfo(weather);
                     }
                     else
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_LONG).show();
+                    swipeRefreshLayout.setRefreshing(false);
                 }
             });
             }
@@ -152,8 +194,8 @@ public class WeatherActivity extends AppCompatActivity {
             TextView maxText=(TextView) view.findViewById(R.id.max_text);
             dateText.setText(forecast.date);
             infoText.setText(forecast.more.info);
-            maxText.setText(forecast.temperature.max);
-            minText.setText(forecast.temperature.min);
+            maxText.setText(forecast.temperature.max+"°C");
+            minText.setText(forecast.temperature.min+"°C");
             forecastLayout.addView(view);
         }
         if(weather.aqi!=null)
@@ -162,6 +204,78 @@ public class WeatherActivity extends AppCompatActivity {
             pm25Text.setText(weather.aqi.aqiCity.pm25);
         }
         weatherLayout.setVisibility(View.VISIBLE);
+        Intent intent=new Intent(this, AutoUpdateService.class);
+        startService(intent);
+
+        //加载天气图
+        switch (weatherInfo)
+    {
+        case "晴":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_sun).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "阴":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_overcast).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "小雨":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_light_rain).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "中雨":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_middle_rain).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "大雨":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_heavy_rain).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "雷阵雨":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_thundershower).into(nowImage);
+            }
+        });
+            break;
+        }
+        case "多云":{runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Glide.with( this ).load( R.drawable.icon ).asBitmap().into( imageView ) ;
+                Glide.with(WeatherActivity.this).load(R.drawable.ic_cloudy).into(nowImage);
+            }
+        });
+            break;
+        }
+
+
+    }
 
     }
     private void loadBingPic()
