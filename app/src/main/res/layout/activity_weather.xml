@@ -53,6 +53,9 @@
                     <include layout="@layout/aqi" />
 
                     <include layout="@layout/suggestion" />
+
+                    <include layout="@layout/bottom" />
+
                 </LinearLayout>
             </ScrollView>
         </android.support.v4.widget.SwipeRefreshLayout>

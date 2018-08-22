@@ -4,38 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="15dp"
-    android:layout_marginTop="15dp"
-    android:background="#8000">
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:text="生活建议"
-        android:textColor="#fff"
-        android:textSize="20sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/comfort_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:text="TextView"
-        android:textColor="#fff"
-        android:textSize="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="0dp"
+    android:background="#0000">
 
     <TextView
         android:id="@+id/car_wash_text"
@@ -46,13 +17,14 @@
         android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:text="TextView"
+        android:gravity="center"
+        android:text="数据来源：和风天气"
         android:textColor="#fff"
-        android:textSize="15dp"
+        android:textSize="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/comfort_text" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/sport_text"
@@ -63,10 +35,11 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:text="TextView"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:text="Design By LanceLee"
         android:textColor="#fff"
-        android:textSize="15dp"
+        android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
