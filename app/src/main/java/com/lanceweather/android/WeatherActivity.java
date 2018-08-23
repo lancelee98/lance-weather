@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.lanceweather.android.gson.Forecast;
 import com.lanceweather.android.gson.Weather;
 import com.lanceweather.android.service.AutoUpdateService;
+import com.lanceweather.android.util.GetCurrentTime;
 import com.lanceweather.android.util.HttpUtil;
 import com.lanceweather.android.util.Utility;
 
@@ -91,7 +92,7 @@ public class WeatherActivity extends AppCompatActivity {
        });
 
        //加载背景图片
-       bingPicImg=(ImageView) findViewById(R.id.bing_pic_img);
+        bingPicImg=(ImageView) findViewById(R.id.bing_pic_img);
         String bingPic=preferences.getString("bing_pic",null);
         if(bingPic!=null)
         {
@@ -168,7 +169,7 @@ public class WeatherActivity extends AppCompatActivity {
         String carWash="洗车指数："+weather.suggestion.carWash.info;
         String sport="运动建议："+weather.suggestion.sport.info;
        titleCity.setText(cityName);
-        titleUpdateTime.setText(updateTime);
+        titleUpdateTime.setText("更新时间:"+GetCurrentTime.getCurrentTime());
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         comfortText.setText(confort);
